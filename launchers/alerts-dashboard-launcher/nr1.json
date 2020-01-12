@@ -1,0 +1,7 @@
+{
+  "schemaType": "LAUNCHER",
+  "id": "alerts-dashboard-launcher",
+  "description": "Simple Dashboard to display Entities with current Alerting status",
+  "displayName": "Alerts Dashboard",
+  "rootNerdletId": "alerts-dashboard-nerdlet"
+}

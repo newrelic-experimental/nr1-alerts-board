@@ -1,0 +1,6 @@
+{
+  "schemaType": "NERDLET",
+  "id": "alerts-dashboard-nerdlet",
+  "displayName": "Alerts Dashboard",
+  "description": "Simple Dashboard to display Entities with current Alerting status"
+}
