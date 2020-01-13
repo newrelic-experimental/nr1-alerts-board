@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack, StackItem, Grid, GridItem } from "nr1";
 import { EntitiesByDomainTypeQuery } from "nr1";
-import { Card, Popup, Image } from "semantic-ui-react";
+import { Card, Popup, Image, Statistic, Transition } from "semantic-ui-react";
 import Critical from "./assets/CRITICAL.png";
 import Warning from "./assets/WARNING.png";
 import NotAlerting from "./assets/NOT_ALERTING.png";
@@ -23,12 +23,13 @@ export default class AlertsDashboard extends React.Component {
     }).then(({ data }) => {
       console.log("DATA ENTITIES");
       console.log(data.entities);
-      let sortedArray = this.sortbySeverity(data.entities);
+      this.sortbySeverity(data.entities);
       this.setState({ entities: data.entities });
       console.log("STATE");
       console.log(this.state.entities);
     });
   }
+
   sortbySeverity(data) {
     var severtityOrder = [
       "CRITICAL",
@@ -46,7 +47,13 @@ export default class AlertsDashboard extends React.Component {
     console.log(sortedData);
   }
 
+  setAnimation(alertSeverity) {
+    if (alertSeverity == "CRITICAL") return "shake";
+    else return "";
+  }
+
   rendercards() {
+    const { duration, visible, transitionOnMount } = this.state;
     return (
       <div>
         <Card.Group style={{ margin: "auto", width: "100%" }} centered>
@@ -54,7 +61,11 @@ export default class AlertsDashboard extends React.Component {
             let appLink =
               "https://one.newrelic.com/redirect/entity/" + entity.guid;
             return (
-              <Card color={this.setColor(entity.alertSeverity)} key={i}>
+              <Card
+                color={this.setColor(entity.alertSeverity)}
+                key={i}
+                className={this.setAnimation(entity.alertSeverity)}
+              >
                 <Card.Content>
                   <Image
                     alt={entity.alertSeverity}
@@ -82,6 +93,7 @@ export default class AlertsDashboard extends React.Component {
                   </Card.Header>
                 </Card.Content>
               </Card>
+              //   </Transition>
             );
           })}
         </Card.Group>
@@ -119,6 +131,48 @@ export default class AlertsDashboard extends React.Component {
     }
   }
 
+  renderCounts() {
+    let counts = {
+      CRITICAL: 0,
+      WARNING: 0,
+      NOT_ALERTING: 0,
+      NOT_CONFIGURED: 0
+    };
+    return (
+      <div>
+        <Statistic.Group style={{ margin: "5px 0px 0px 5px" }}>
+          {this.state.entities.map((entity, i) => {
+            if (entity.alertSeverity == "CRITICAL") {
+              counts.CRITICAL = counts.CRITICAL + 1;
+            } else if (entity.alertSeverity == "WARNING") {
+              counts.WARNING = counts.WARNING + 1;
+            } else if (entity.alertSeverity == "NOT_ALERTING") {
+              counts.NOT_ALERTING = counts.NOT_ALERTING + 1;
+            } else {
+              counts.NOT_CONFIGURED = counts.NOT_CONFIGURED + 1;
+            }
+          })}
+          <Statistic color="red">
+            <Statistic.Value>{counts.CRITICAL}</Statistic.Value>
+            <Statistic.Label>Critical</Statistic.Label>
+          </Statistic>
+          <Statistic color="orange">
+            <Statistic.Value>{counts.WARNING}</Statistic.Value>
+            <Statistic.Label>Warning</Statistic.Label>
+          </Statistic>
+          <Statistic color="green">
+            <Statistic.Value>{counts.NOT_ALERTING}</Statistic.Value>
+            <Statistic.Label>Not Alerting</Statistic.Label>
+          </Statistic>
+          <Statistic color="grey">
+            <Statistic.Value>{counts.NOT_CONFIGURED}</Statistic.Value>
+            <Statistic.Label>Not Configured</Statistic.Label>
+          </Statistic>
+        </Statistic.Group>
+      </div>
+    );
+  }
+
   render() {
     return (
       <>
@@ -149,9 +203,7 @@ export default class AlertsDashboard extends React.Component {
               verticalType={Stack.VERTICAL_TYPE.CENTER}
               horizontalType={Stack.HORIZONTAL_TYPE.RIGHT}
             >
-              <StackItem>
-                <h1>this is placeholder</h1>
-              </StackItem>
+              <StackItem>{this.renderCounts()}</StackItem>
             </Stack>
           </StackItem>
         </Stack>
