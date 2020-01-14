@@ -165,6 +165,9 @@ code {
   }
 }
 
+// SEMANTIC UI OVERRIDE
+// CARD BOTTOM COLOR THICKNESS OVERRIDE
+
 .ui.cards > .red.card,
 .ui.red.card,
 .ui.red.cards > .card {
@@ -192,6 +195,15 @@ code {
   -webkit-box-shadow: 0 0 0 1px #d4d4d5, 0 6px 0 0 #808080, 0 1px 3px 0 #d4d4d5;
   box-shadow: 0 0 0 1px #d4d4d5, 0 6px 0 0 #808080, 0 1px 3px 0 #d4d4d5;
 }
+
+// TOP RIGHT COUNT OVERRIDE
+
+.ui.statistic > .value,
+.ui.statistics .statistic > .value {
+  font-size: 3.5rem !important;
+}
+
+// ANIMATIONS OF THE CARD
 
 .shake {
   animation: shake 0.5s;

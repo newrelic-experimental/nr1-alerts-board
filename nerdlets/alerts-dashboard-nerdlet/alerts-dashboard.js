@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack, StackItem, Grid, GridItem } from "nr1";
-import { EntitiesByDomainTypeQuery } from "nr1";
-import { Card, Popup, Image, Statistic, Transition } from "semantic-ui-react";
+import { EntitiesByDomainTypeQuery, NerdGraphQuery } from "nr1";
+import { Card, Popup, Image, Statistic } from "semantic-ui-react";
 import Critical from "./assets/CRITICAL.png";
 import Warning from "./assets/WARNING.png";
 import NotAlerting from "./assets/NOT_ALERTING.png";
@@ -12,11 +12,49 @@ export default class AlertsDashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      entities: []
+      entities: [],
+      account: ""
     };
+    this.setAlertsDashboardState = this.setAlertsDashboardState.bind(this);
   }
 
   componentDidMount() {
+    // refresh every 15 seconds
+    this.load();
+    this.interval = setInterval(() => this.load(), 15000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  setAlertsDashboardState(data) {
+    //debugger;
+    console.log(">>", data.account.id);
+    this.setState({ account: data.account.id });
+  }
+
+  async load() {
+    //GraphQL
+    const gql = `
+    {
+		  actor {
+		    entitySearch(query: "(accountId = ${this.state.account}) AND domain IN ('APM')") {
+		      count
+		      query
+		      results {
+		        entities {
+		          ... on ApmApplicationEntityOutline {
+		            name
+		            alertSeverity
+		          }
+		        }
+		      }
+		    }
+		  }
+		}`;
+    let result = NerdGraphQuery.query({ query: gql });
+    console.log("Result :", result);
     EntitiesByDomainTypeQuery.query({
       entityDomain: "APM",
       entityType: "APPLICATION"
@@ -53,7 +91,6 @@ export default class AlertsDashboard extends React.Component {
   }
 
   rendercards() {
-    const { duration, visible, transitionOnMount } = this.state;
     return (
       <div>
         <Card.Group style={{ margin: "auto", width: "100%" }} centered>
@@ -93,7 +130,6 @@ export default class AlertsDashboard extends React.Component {
                   </Card.Header>
                 </Card.Content>
               </Card>
-              //   </Transition>
             );
           })}
         </Card.Group>
@@ -140,7 +176,7 @@ export default class AlertsDashboard extends React.Component {
     };
     return (
       <div>
-        <Statistic.Group style={{ margin: "5px 0px 0px 5px" }}>
+        <Statistic.Group style={{ margin: "9px 15px 0px 0px" }}>
           {this.state.entities.map((entity, i) => {
             if (entity.alertSeverity == "CRITICAL") {
               counts.CRITICAL = counts.CRITICAL + 1;
@@ -191,7 +227,7 @@ export default class AlertsDashboard extends React.Component {
             >
               <StackItem className="toolbar-item has-separator">
                 <AccountPicker
-                  accountChangedCallback={this.onAccountSelected}
+                  setAlertsDashboardState={this.setAlertsDashboardState}
                 />
               </StackItem>
             </Stack>
