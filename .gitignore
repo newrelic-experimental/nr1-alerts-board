@@ -1,3 +1,4 @@
 tmp
 node_modules
 nerdlets/alerts-dashboard-nerdlet/test-dashboard.js
+alerts-dashboard/dist/metadata.json
