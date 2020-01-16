@@ -1,12 +1,22 @@
 import React from "react";
-import { Stack, StackItem, Grid, GridItem } from "nr1";
+import { Stack, StackItem, Grid, GridItem, Spinner } from "nr1";
 import { Card, Popup, Image, Statistic } from "semantic-ui-react";
+import AccountPicker from "./account-picker.js";
+import { EntitySearchByAccount } from "./utils.js";
+import { SemipolarLoading } from "react-loadingg";
+
 import Critical from "./assets/CRITICAL.png";
 import Warning from "./assets/WARNING.png";
 import NotAlerting from "./assets/NOT_ALERTING.png";
 import NotConfigured from "./assets/NOT_CONFIGURED.png";
-import AccountPicker from "./account-picker.js";
-import { EntitySearchByAccount } from "./utils.js";
+import Ruby from "./assets/ruby.png";
+import Php from "./assets/php.png";
+import Java from "./assets/java.png";
+import Dotnet from "./assets/dotnet.png";
+import Python from "./assets/python.png";
+import Nodejs from "./assets/nodejs.png";
+import Go from "./assets/go.png";
+import C from "./assets/c.png";
 
 export default class AlertsDashboard extends React.Component {
   constructor(props) {
@@ -14,17 +24,16 @@ export default class AlertsDashboard extends React.Component {
     this.state = {
       entities: [],
       account: "",
-      selectedAccountId: undefined
+      selectedAccountId: undefined,
+      loading: true
     };
     this.onAccountSelected = this.onAccountSelected.bind(this);
   }
 
   componentDidMount() {
-    console.log("DASHBOARD : componentDidMount");
-    // refresh every 15 seconds
     this.interval = setInterval(
       () => this._fetchData(this.state.selectedAccountId),
-      15000000
+      1500000
     );
   }
 
@@ -33,7 +42,6 @@ export default class AlertsDashboard extends React.Component {
   }
 
   async onAccountSelected(accountId) {
-    console.log("DASHBOARD : onAccountSelected START");
     this.setState({
       selectedAccountId: accountId
     });
@@ -41,32 +49,26 @@ export default class AlertsDashboard extends React.Component {
   }
 
   async _fetchData(accountId) {
-    console.log("DASHBOARD : _fetchData");
-    console.log("DASHBOARD : _fetchData START with ACCOUNT: " + accountId);
     let apm = EntitySearchByAccount("APM", accountId);
-    console.log("DASHBOARD : APM OBJECT: " + apm);
     Promise.all([apm]).then(values => {
       if (values["0"].data.actor.entitySearch.count != 0) {
-        console.log(
-          "VALUES: " + values["0"].data.actor.entitySearch.results.entities
-        );
         this.sortbySeverity(
           values["0"].data.actor.entitySearch.results.entities
         );
         this.setState({
-          entities: values["0"].data.actor.entitySearch.results.entities
+          entities: values["0"].data.actor.entitySearch.results.entities,
+          loading: false
         });
       } else {
-        console.log("DASHBOARD : NO APM DATA FOUND");
         this.setState({
-          entities: []
+          entities: [],
+          loading: false
         });
       }
     });
   }
 
   sortbySeverity(data) {
-    console.log("DASHBOARD : sortbySeverity STARTED");
     var severtityOrder = [
       "CRITICAL",
       "WARNING",
@@ -79,17 +81,14 @@ export default class AlertsDashboard extends React.Component {
         severtityOrder.indexOf(b.alertSeverity)
       );
     });
-    console.log("DASHBOARD : SORTED DATA" + sortedData);
   }
 
   setAnimation(alertSeverity) {
-    console.log("DASHBOARD : setAnimation STARTED");
     if (alertSeverity == "CRITICAL") return "shake";
     else return "";
   }
 
   setColor(alertSeverity) {
-    console.log("DASHBOARD :setColor STARTED");
     switch (alertSeverity) {
       case "CRITICAL":
         return "red";
@@ -105,7 +104,6 @@ export default class AlertsDashboard extends React.Component {
   }
 
   setLogo(alertSeverity) {
-    console.log("DASHBOARD :setLogo STARTED");
     switch (alertSeverity) {
       case "CRITICAL":
         return Critical;
@@ -121,66 +119,169 @@ export default class AlertsDashboard extends React.Component {
   }
 
   rendercards() {
-    console.log("DASHBOARD :RENDER CARDS STARTED");
-    if (this.state.entities.length > 0) {
-      return (
-        <div>
-          <Card.Group style={{ margin: "auto", width: "100%" }} centered>
-            {this.state.entities.map((entity, i) => {
-              let appLink =
-                "https://one.newrelic.com/redirect/entity/" + entity.guid;
-              return (
-                <Card
-                  color={this.setColor(entity.alertSeverity)}
-                  key={i}
-                  className={this.setAnimation(entity.alertSeverity)}
-                >
-                  <Card.Content>
-                    <Image
-                      alt={entity.alertSeverity}
-                      floated="right"
-                      size="mini"
-                      src={this.setLogo(entity.alertSeverity)}
-                    />
-                    <Card.Header>
-                      {
-                        <Popup
-                          hoverable
-                          position="top center"
-                          content={
-                            <a
-                              href={appLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {entity.name}
-                            </a>
-                          }
-                          trigger={<h5>{entity.name}</h5>}
-                        />
-                      }
-                    </Card.Header>
-                  </Card.Content>
-                </Card>
-              );
-            })}
-          </Card.Group>
-        </div>
-      );
+    if (this.state.loading) {
+      return <SemipolarLoading color="#0189A4" />;
     } else {
-      return (
-        <div>
-          <h1>
-            What you can't see is what you can't measure! Please instrument your
-            apps with New Relic APM Agent.
-          </h1>
-        </div>
-      );
+      if (this.state.entities.length > 0) {
+        return (
+          <div>
+            <Card.Group style={{ margin: "auto", width: "100%" }} centered>
+              {this.state.entities.map((entity, i) => {
+                let appLink =
+                  "https://one.newrelic.com/redirect/entity/" + entity.guid;
+                return (
+                  <Card
+                    color={this.setColor(entity.alertSeverity)}
+                    key={i}
+                    className={this.setAnimation(entity.alertSeverity)}
+                  >
+                    <Card.Content>
+                      <Image
+                        alt={entity.alertSeverity}
+                        floated="right"
+                        size="mini"
+                        src={this.setLogo(entity.alertSeverity)}
+                      />
+                      <Card.Header>
+                        {
+                          <Popup
+                            hoverable
+                            position="top center"
+                            content={
+                              <a
+                                href={appLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {entity.name}
+                              </a>
+                            }
+                            trigger={<h5>{entity.name}</h5>}
+                          />
+                        }
+                      </Card.Header>
+                    </Card.Content>
+                  </Card>
+                );
+              })}
+            </Card.Group>
+          </div>
+        );
+      } else {
+        return (
+          <div>
+            <div className="ui message">
+              <div className="header">
+                What you can't see is what you can't measure!
+              </div>
+              <p>
+                Currently there are no application instrumented or reporting on
+                this account. Please instrument your apps with New Relic APM
+                Agent.
+              </p>
+            </div>
+            <h1>Get started with New Relic</h1>
+            <br />
+            <h3>Select a web agent to install.</h3>
+            <div>
+              <Image.Group size="small">
+                <a
+                  href={
+                    "https://rpm.newrelic.com/accounts/" +
+                    this.state.selectedAccountId +
+                    "/applications/setup#ruby"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={Ruby} />
+                </a>
+                <a
+                  href={
+                    "https://rpm.newrelic.com/accounts/" +
+                    this.state.selectedAccountId +
+                    "/applications/setup#php"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={Php} />
+                </a>
+                <a
+                  href={
+                    "https://rpm.newrelic.com/accounts/" +
+                    this.state.selectedAccountId +
+                    "/applications/setup#java"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={Java} />
+                </a>
+                <a
+                  href={
+                    "https://rpm.newrelic.com/accounts/" +
+                    this.state.selectedAccountId +
+                    "/applications/setup#dotnet"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={Dotnet} />
+                </a>
+                <a
+                  href={
+                    "https://rpm.newrelic.com/accounts/" +
+                    this.state.selectedAccountId +
+                    "/applications/setup#python"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={Python} />
+                </a>
+                <a
+                  href={
+                    "https://rpm.newrelic.com/accounts/" +
+                    this.state.selectedAccountId +
+                    "/applications/setup#nodejs"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={Nodejs} />
+                </a>
+                <a
+                  href={
+                    "https://rpm.newrelic.com/accounts/" +
+                    this.state.selectedAccountId +
+                    "/applications/setup#go"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={Go} />
+                </a>
+                <a
+                  href={
+                    "https://rpm.newrelic.com/accounts/" +
+                    this.state.selectedAccountId +
+                    "/applications/setup#c"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Image src={C} />
+                </a>
+              </Image.Group>
+            </div>
+          </div>
+        );
+      }
     }
   }
 
   renderCounts() {
-    console.log("DASHBOARD :renderCounts STARTED");
     let counts = {
       CRITICAL: 0,
       WARNING: 0,
@@ -223,7 +324,6 @@ export default class AlertsDashboard extends React.Component {
   }
 
   render() {
-    console.log("DASHBOARD :render STARTED");
     return (
       <>
         <Stack

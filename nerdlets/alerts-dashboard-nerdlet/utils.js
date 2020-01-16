@@ -2,10 +2,6 @@ import { NerdGraphQuery } from "nr1";
 
 // search for entities by domain & account
 export const EntitySearchByAccount = async (domain, accountId, cursor) => {
-  console.log("EntitySearchByAccount : GRAPHQL STARTED");
-  console.log(
-    "EntitySearchByAccount : GRAPHQL STARTED WITH ACCOUNT: " + accountId
-  );
   const gql = `
     {
 		  actor {
@@ -33,6 +29,5 @@ export const EntitySearchByAccount = async (domain, accountId, cursor) => {
     console.log(JSON.stringify(result.errors.slice(0, 5), 0, 2));
     return [];
   }
-  console.log("EntitySearchByAccount: GRAPHQL RESULT " + result);
   return result;
 };

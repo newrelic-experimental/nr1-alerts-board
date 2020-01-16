@@ -21,7 +21,6 @@ export default class AccountPicker extends React.Component {
   }
 
   async componentDidMount() {
-    console.log("ACCOUNT PICKER : componentDidMount START");
     const accountsResults = await AccountsQuery.query({});
     if (accountsResults.data) {
       const accounts = accountsResults.data;
@@ -41,7 +40,6 @@ export default class AccountPicker extends React.Component {
   }
 
   async getLastChoseAccountId() {
-    console.log("ACCOUNT PICKER : getLastChoseAccountId");
     const userStorageQuery = {
       collection: USER_ACCOUNT_COLLECTION,
       documentId: USER_SELECTED_ACCOUNT_ID
@@ -52,7 +50,6 @@ export default class AccountPicker extends React.Component {
   }
 
   async saveOffLastChosenAccountId(accountId) {
-    console.log("ACCOUNT PICKER : saveOffLastChosenAccountId");
     const userMutation = {
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
       collection: USER_ACCOUNT_COLLECTION,
@@ -63,24 +60,20 @@ export default class AccountPicker extends React.Component {
   }
 
   async _accountChanged(account, accounts) {
-    console.log("ACCOUNT PICKER : _accountChanged");
     const accountId = account.id;
     const { accountChangedCallback } = this.props;
     this.saveOffLastChosenAccountId(accountId);
     if (accountChangedCallback) {
-      console.log("ACCOUNT PICKER : accountChangedCallback IF CONDITION START");
       await accountChangedCallback(accountId, this.state.accounts);
     }
     this.setState({ selectedAccount: account, accounts });
   }
   async onAccountChange(account) {
-    console.log("ACCOUNT PICKER : onAccountChange");
     const { accounts } = this.state;
     await this._accountChanged(account, accounts);
   }
 
   render() {
-    console.log("ACCOUNT PICKER : render STARTED");
     const { accounts, filter, selectedAccount } = this.state;
     let filteredAccounts = [...accounts];
     if (filter && filter.length > 0) {
