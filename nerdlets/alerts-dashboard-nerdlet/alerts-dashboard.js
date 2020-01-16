@@ -1,74 +1,72 @@
 import React from "react";
 import { Stack, StackItem, Grid, GridItem } from "nr1";
-import { EntitiesByDomainTypeQuery, NerdGraphQuery } from "nr1";
 import { Card, Popup, Image, Statistic } from "semantic-ui-react";
 import Critical from "./assets/CRITICAL.png";
 import Warning from "./assets/WARNING.png";
 import NotAlerting from "./assets/NOT_ALERTING.png";
 import NotConfigured from "./assets/NOT_CONFIGURED.png";
 import AccountPicker from "./account-picker.js";
+import { EntitySearchByAccount } from "./utils.js";
 
 export default class AlertsDashboard extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       entities: [],
-      account: ""
+      account: "",
+      selectedAccountId: undefined
     };
-    this.setAlertsDashboardState = this.setAlertsDashboardState.bind(this);
+    this.onAccountSelected = this.onAccountSelected.bind(this);
   }
 
   componentDidMount() {
+    console.log("DASHBOARD : componentDidMount");
     // refresh every 15 seconds
-    this.load();
-    this.interval = setInterval(() => this.load(), 15000);
+    this.interval = setInterval(
+      () => this._fetchData(this.state.selectedAccountId),
+      15000000
+    );
   }
 
   componentWillUnmount() {
     clearInterval(this.interval);
   }
 
-  setAlertsDashboardState(data) {
-    //debugger;
-    console.log(">>", data.account.id);
-    this.setState({ account: data.account.id });
+  async onAccountSelected(accountId) {
+    console.log("DASHBOARD : onAccountSelected START");
+    this.setState({
+      selectedAccountId: accountId
+    });
+    this._fetchData(accountId);
   }
 
-  async load() {
-    //GraphQL
-    const gql = `
-    {
-		  actor {
-		    entitySearch(query: "(accountId = ${this.state.account}) AND domain IN ('APM')") {
-		      count
-		      query
-		      results {
-		        entities {
-		          ... on ApmApplicationEntityOutline {
-		            name
-		            alertSeverity
-		          }
-		        }
-		      }
-		    }
-		  }
-		}`;
-    let result = NerdGraphQuery.query({ query: gql });
-    console.log("Result :", result);
-    EntitiesByDomainTypeQuery.query({
-      entityDomain: "APM",
-      entityType: "APPLICATION"
-    }).then(({ data }) => {
-      console.log("DATA ENTITIES");
-      console.log(data.entities);
-      this.sortbySeverity(data.entities);
-      this.setState({ entities: data.entities });
-      console.log("STATE");
-      console.log(this.state.entities);
+  async _fetchData(accountId) {
+    console.log("DASHBOARD : _fetchData");
+    console.log("DASHBOARD : _fetchData START with ACCOUNT: " + accountId);
+    let apm = EntitySearchByAccount("APM", accountId);
+    console.log("DASHBOARD : APM OBJECT: " + apm);
+    Promise.all([apm]).then(values => {
+      if (values["0"].data.actor.entitySearch.count != 0) {
+        console.log(
+          "VALUES: " + values["0"].data.actor.entitySearch.results.entities
+        );
+        this.sortbySeverity(
+          values["0"].data.actor.entitySearch.results.entities
+        );
+        this.setState({
+          entities: values["0"].data.actor.entitySearch.results.entities
+        });
+      } else {
+        console.log("DASHBOARD : NO APM DATA FOUND");
+        this.setState({
+          entities: []
+        });
+      }
     });
   }
 
   sortbySeverity(data) {
+    console.log("DASHBOARD : sortbySeverity STARTED");
     var severtityOrder = [
       "CRITICAL",
       "WARNING",
@@ -81,63 +79,17 @@ export default class AlertsDashboard extends React.Component {
         severtityOrder.indexOf(b.alertSeverity)
       );
     });
-    console.log("SORTED");
-    console.log(sortedData);
+    console.log("DASHBOARD : SORTED DATA" + sortedData);
   }
 
   setAnimation(alertSeverity) {
+    console.log("DASHBOARD : setAnimation STARTED");
     if (alertSeverity == "CRITICAL") return "shake";
     else return "";
   }
 
-  rendercards() {
-    return (
-      <div>
-        <Card.Group style={{ margin: "auto", width: "100%" }} centered>
-          {this.state.entities.map((entity, i) => {
-            let appLink =
-              "https://one.newrelic.com/redirect/entity/" + entity.guid;
-            return (
-              <Card
-                color={this.setColor(entity.alertSeverity)}
-                key={i}
-                className={this.setAnimation(entity.alertSeverity)}
-              >
-                <Card.Content>
-                  <Image
-                    alt={entity.alertSeverity}
-                    floated="right"
-                    size="mini"
-                    src={this.setLogo(entity.alertSeverity)}
-                  />
-                  <Card.Header>
-                    {
-                      <Popup
-                        hoverable
-                        position="top center"
-                        content={
-                          <a
-                            href={appLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {entity.name}
-                          </a>
-                        }
-                        trigger={<h5>{entity.name}</h5>}
-                      />
-                    }
-                  </Card.Header>
-                </Card.Content>
-              </Card>
-            );
-          })}
-        </Card.Group>
-      </div>
-    );
-  }
-
   setColor(alertSeverity) {
+    console.log("DASHBOARD :setColor STARTED");
     switch (alertSeverity) {
       case "CRITICAL":
         return "red";
@@ -153,6 +105,7 @@ export default class AlertsDashboard extends React.Component {
   }
 
   setLogo(alertSeverity) {
+    console.log("DASHBOARD :setLogo STARTED");
     switch (alertSeverity) {
       case "CRITICAL":
         return Critical;
@@ -167,7 +120,67 @@ export default class AlertsDashboard extends React.Component {
     }
   }
 
+  rendercards() {
+    console.log("DASHBOARD :RENDER CARDS STARTED");
+    if (this.state.entities.length > 0) {
+      return (
+        <div>
+          <Card.Group style={{ margin: "auto", width: "100%" }} centered>
+            {this.state.entities.map((entity, i) => {
+              let appLink =
+                "https://one.newrelic.com/redirect/entity/" + entity.guid;
+              return (
+                <Card
+                  color={this.setColor(entity.alertSeverity)}
+                  key={i}
+                  className={this.setAnimation(entity.alertSeverity)}
+                >
+                  <Card.Content>
+                    <Image
+                      alt={entity.alertSeverity}
+                      floated="right"
+                      size="mini"
+                      src={this.setLogo(entity.alertSeverity)}
+                    />
+                    <Card.Header>
+                      {
+                        <Popup
+                          hoverable
+                          position="top center"
+                          content={
+                            <a
+                              href={appLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {entity.name}
+                            </a>
+                          }
+                          trigger={<h5>{entity.name}</h5>}
+                        />
+                      }
+                    </Card.Header>
+                  </Card.Content>
+                </Card>
+              );
+            })}
+          </Card.Group>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <h1>
+            What you can't see is what you can't measure! Please instrument your
+            apps with New Relic APM Agent.
+          </h1>
+        </div>
+      );
+    }
+  }
+
   renderCounts() {
+    console.log("DASHBOARD :renderCounts STARTED");
     let counts = {
       CRITICAL: 0,
       WARNING: 0,
@@ -210,6 +223,7 @@ export default class AlertsDashboard extends React.Component {
   }
 
   render() {
+    console.log("DASHBOARD :render STARTED");
     return (
       <>
         <Stack
@@ -227,7 +241,7 @@ export default class AlertsDashboard extends React.Component {
             >
               <StackItem className="toolbar-item has-separator">
                 <AccountPicker
-                  setAlertsDashboardState={this.setAlertsDashboardState}
+                  accountChangedCallback={this.onAccountSelected}
                 />
               </StackItem>
             </Stack>
