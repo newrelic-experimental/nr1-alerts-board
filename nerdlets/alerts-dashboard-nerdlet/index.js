@@ -1,6 +1,6 @@
 import React from "react";
 import { NerdletStateContext, PlatformStateContext, AutoSizer } from "nr1";
-import HorizonMaturity from "./alerts-dashboard";
+import AlertsDashboard from "./alerts-dashboard";
 
 // https://docs.newrelic.com/docs/new-relic-programmable-platform-introduction
 
@@ -13,7 +13,7 @@ export default class Root extends React.Component {
             {nerdletUrlState => (
               <AutoSizer>
                 {({ width, height }) => (
-                  <HorizonMaturity
+                  <AlertsDashboard
                     launcherUrlState={launcherUrlState}
                     nerdletUrlState={nerdletUrlState}
                     width={width}

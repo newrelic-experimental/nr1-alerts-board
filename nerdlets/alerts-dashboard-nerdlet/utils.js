@@ -5,17 +5,20 @@ export const EntitySearchByAccount = async (domain, accountId, cursor) => {
   const gql = `
     {
 		  actor {
-		    entitySearch(query: "domain IN ('${domain}') AND (accountId='${accountId}')") {
+		    entitySearch(query: "type IN ('APPLICATION', 'HOST') AND (accountId='${accountId}')") {
 		      count
 		      query
 		      results {
 		        entities {
-		          ... on ApmApplicationEntityOutline {
+					... on AlertableEntityOutline {
+					  alertSeverity
+					}
 					name
 					guid
-		            alertSeverity
-		          }
-		        }
+					permalink
+					type
+					entityType
+				}
 		      }
 		    }
 		  }

@@ -1,7 +1,8 @@
 import React from "react";
-import { Stack, StackItem, Grid, GridItem, Spinner } from "nr1";
-import { Card, Popup, Image, Statistic } from "semantic-ui-react";
+import { Stack, StackItem, Grid, GridItem } from "nr1";
+import { Card, Image, Statistic, Tab, Label, Menu } from "semantic-ui-react";
 import AccountPicker from "./account-picker.js";
+import SplashPage from "./splashpage.js";
 import { EntitySearchByAccount } from "./utils.js";
 import { SemipolarLoading } from "react-loadingg";
 
@@ -9,14 +10,6 @@ import Critical from "./assets/CRITICAL.png";
 import Warning from "./assets/WARNING.png";
 import NotAlerting from "./assets/NOT_ALERTING.png";
 import NotConfigured from "./assets/NOT_CONFIGURED.png";
-import Ruby from "./assets/ruby.png";
-import Php from "./assets/php.png";
-import Java from "./assets/java.png";
-import Dotnet from "./assets/dotnet.png";
-import Python from "./assets/python.png";
-import Nodejs from "./assets/nodejs.png";
-import Go from "./assets/go.png";
-import C from "./assets/c.png";
 
 export default class AlertsDashboard extends React.Component {
   constructor(props) {
@@ -25,7 +18,14 @@ export default class AlertsDashboard extends React.Component {
       entities: [],
       account: "",
       selectedAccountId: undefined,
-      loading: true
+      loading: true,
+      notificationCount: {
+        APM: 0,
+        HOST: 0,
+        BROWSER: 0,
+        MOBILE: 0
+      },
+      showTabs: false
     };
     this.onAccountSelected = this.onAccountSelected.bind(this);
   }
@@ -57,14 +57,17 @@ export default class AlertsDashboard extends React.Component {
         );
         this.setState({
           entities: values["0"].data.actor.entitySearch.results.entities,
-          loading: false
+          loading: false,
+          showTabs: true
         });
       } else {
         this.setState({
           entities: [],
-          loading: false
+          loading: false,
+          showTabs: false
         });
       }
+      this.renderNotificationCount();
     });
   }
 
@@ -118,169 +121,6 @@ export default class AlertsDashboard extends React.Component {
     }
   }
 
-  rendercards() {
-    if (this.state.loading) {
-      return <SemipolarLoading color="#0189A4" />;
-    } else {
-      if (this.state.entities.length > 0) {
-        return (
-          <div>
-            <Card.Group style={{ margin: "auto", width: "100%" }} centered>
-              {this.state.entities.map((entity, i) => {
-                let appLink =
-                  "https://one.newrelic.com/redirect/entity/" + entity.guid;
-                return (
-                  <Card
-                    color={this.setColor(entity.alertSeverity)}
-                    key={i}
-                    className={this.setAnimation(entity.alertSeverity)}
-                  >
-                    <Card.Content>
-                      <Image
-                        alt={entity.alertSeverity}
-                        floated="right"
-                        size="mini"
-                        src={this.setLogo(entity.alertSeverity)}
-                      />
-                      <Card.Header>
-                        {
-                          <Popup
-                            hoverable
-                            position="top center"
-                            content={
-                              <a
-                                href={appLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {entity.name}
-                              </a>
-                            }
-                            trigger={<h5>{entity.name}</h5>}
-                          />
-                        }
-                      </Card.Header>
-                    </Card.Content>
-                  </Card>
-                );
-              })}
-            </Card.Group>
-          </div>
-        );
-      } else {
-        return (
-          <div>
-            <div className="ui message">
-              <div className="header">
-                What you can't see is what you can't measure!
-              </div>
-              <p>
-                Currently there are no application instrumented or reporting on
-                this account. Please instrument your apps with New Relic APM
-                Agent.
-              </p>
-            </div>
-            <h1>Get started with New Relic</h1>
-            <br />
-            <h3>Select a web agent to install.</h3>
-            <div>
-              <Image.Group size="small">
-                <a
-                  href={
-                    "https://rpm.newrelic.com/accounts/" +
-                    this.state.selectedAccountId +
-                    "/applications/setup#ruby"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image src={Ruby} />
-                </a>
-                <a
-                  href={
-                    "https://rpm.newrelic.com/accounts/" +
-                    this.state.selectedAccountId +
-                    "/applications/setup#php"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image src={Php} />
-                </a>
-                <a
-                  href={
-                    "https://rpm.newrelic.com/accounts/" +
-                    this.state.selectedAccountId +
-                    "/applications/setup#java"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image src={Java} />
-                </a>
-                <a
-                  href={
-                    "https://rpm.newrelic.com/accounts/" +
-                    this.state.selectedAccountId +
-                    "/applications/setup#dotnet"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image src={Dotnet} />
-                </a>
-                <a
-                  href={
-                    "https://rpm.newrelic.com/accounts/" +
-                    this.state.selectedAccountId +
-                    "/applications/setup#python"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image src={Python} />
-                </a>
-                <a
-                  href={
-                    "https://rpm.newrelic.com/accounts/" +
-                    this.state.selectedAccountId +
-                    "/applications/setup#nodejs"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image src={Nodejs} />
-                </a>
-                <a
-                  href={
-                    "https://rpm.newrelic.com/accounts/" +
-                    this.state.selectedAccountId +
-                    "/applications/setup#go"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image src={Go} />
-                </a>
-                <a
-                  href={
-                    "https://rpm.newrelic.com/accounts/" +
-                    this.state.selectedAccountId +
-                    "/applications/setup#c"
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Image src={C} />
-                </a>
-              </Image.Group>
-            </div>
-          </div>
-        );
-      }
-    }
-  }
-
   renderCounts() {
     let counts = {
       CRITICAL: 0,
@@ -288,6 +128,7 @@ export default class AlertsDashboard extends React.Component {
       NOT_ALERTING: 0,
       NOT_CONFIGURED: 0
     };
+
     return (
       <div>
         <Statistic.Group style={{ margin: "9px 15px 0px 0px" }}>
@@ -321,6 +162,163 @@ export default class AlertsDashboard extends React.Component {
         </Statistic.Group>
       </div>
     );
+  }
+
+  renderNotificationCount() {
+    let apm = 0;
+    let host = 0;
+    let browser = 0;
+    let mobile = 0;
+    {
+      this.state.entities.map(entity => {
+        if (entity.alertSeverity == "CRITICAL") {
+          if (entity.entityType === "APM_APPLICATION_ENTITY") {
+            apm = apm + 1;
+            this.setState(prevState => ({
+              notificationCount: {
+                ...prevState.notificationCount,
+                APM: apm
+              }
+            }));
+          } else if (entity.entityType === "BROWSER_APPLICATION_ENTITY") {
+            browser = browser + 1;
+            this.setState(prevState => ({
+              notificationCount: {
+                ...prevState.notificationCount,
+                BROWSER: browser
+              }
+            }));
+          } else if (entity.entityType === "MOBILE_APPLICATION_ENTITY") {
+            mobile = mobile = 1;
+            this.setState(prevState => ({
+              notificationCount: {
+                ...prevState.notificationCount,
+                MOBILE: mobile
+              }
+            }));
+          } else if (entity.entityType === "INFRASTRUCTURE_HOST_ENTITY") {
+            host = host + 1;
+            this.setState(prevState => ({
+              notificationCount: {
+                ...prevState.notificationCount,
+                HOST: host
+              }
+            }));
+          }
+        }
+      });
+    }
+  }
+
+  rendercards(type, entityType) {
+    if (this.state.loading) {
+      return <SemipolarLoading color="#0189A4" />;
+    } else {
+      if (this.state.entities.length > 0) {
+        return (
+          <Tab.Pane>
+            <div>
+              <Card.Group style={{ margin: "auto", width: "100%" }} centered>
+                {this.state.entities.map((entity, i) => {
+                  if (
+                    entity.type === type &&
+                    entity.entityType === entityType
+                  ) {
+                    return (
+                      <Card
+                        color={this.setColor(entity.alertSeverity)}
+                        key={i}
+                        className={this.setAnimation(entity.alertSeverity)}
+                      >
+                        <Card.Content>
+                          <Image
+                            alt={entity.alertSeverity}
+                            floated="right"
+                            size="mini"
+                            src={this.setLogo(entity.alertSeverity)}
+                          />
+                          <Card.Header>
+                            <a
+                              href={entity.permalink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {entity.name}
+                            </a>
+                          </Card.Header>
+                        </Card.Content>
+                      </Card>
+                    );
+                  }
+                })}
+              </Card.Group>
+            </div>
+          </Tab.Pane>
+        );
+      } else {
+        return <SplashPage></SplashPage>;
+      }
+    }
+  }
+
+  renderContainer() {
+    if (!this.state.showTabs) {
+      return this.rendercards();
+    } else {
+      return <Tab panes={this.renderTabs()} />;
+    }
+  }
+
+  renderTabs() {
+    const panes = [
+      {
+        menuItem: (
+          <Menu.Item key="apm">
+            APM
+            <Label circular color="red" floating>
+              {this.state.notificationCount.APM}
+            </Label>
+          </Menu.Item>
+        ),
+        render: () => this.rendercards("APPLICATION", "APM_APPLICATION_ENTITY")
+      },
+      {
+        menuItem: (
+          <Menu.Item key="host">
+            HOST
+            <Label circular color="red" floating>
+              {this.state.notificationCount.HOST}
+            </Label>
+          </Menu.Item>
+        ),
+        render: () => this.rendercards("HOST", "INFRASTRUCTURE_HOST_ENTITY")
+      },
+      {
+        menuItem: (
+          <Menu.Item key="browser">
+            BROWSER
+            <Label circular color="red" floating>
+              {this.state.notificationCount.BROWSER}
+            </Label>
+          </Menu.Item>
+        ),
+        render: () =>
+          this.rendercards("APPLICATION", "BROWSER_APPLICATION_ENTITY")
+      },
+      {
+        menuItem: (
+          <Menu.Item key="mobile">
+            MOBILE
+            <Label circular color="red" floating>
+              {this.state.notificationCount.MOBILE}
+            </Label>
+          </Menu.Item>
+        ),
+        render: () =>
+          this.rendercards("APPLICATION", "MOBILE_APPLICATION_ENTITY")
+      }
+    ];
+    return panes;
   }
 
   render() {
@@ -361,14 +359,9 @@ export default class AlertsDashboard extends React.Component {
           className="primary-grid"
           spacingType={[Grid.SPACING_TYPE.NONE, Grid.SPACING_TYPE.NONE]}
         >
-          {/*
-        Note: This sidebar does _not_ have to be a list of links/navigation.
-        It can just as easily contain content. This is just an example of how it
-        may be used.
-      */}
           <GridItem className="primary-content-container" columnSpan={12}>
             <main className="primary-content full-height">
-              {this.rendercards()}
+              {this.renderContainer()}
             </main>
           </GridItem>
         </Grid>
