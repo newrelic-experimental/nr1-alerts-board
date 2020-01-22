@@ -4,3 +4,4 @@ nerdlets/alerts-dashboard-nerdlet/test-dashboard.js
 alerts-dashboard/dist/metadata.json
 .DS_Store
 dist/metadata.json
+package.json
