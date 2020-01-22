@@ -1,6 +1,7 @@
 import React from "react";
 import { NerdletStateContext, PlatformStateContext, AutoSizer } from "nr1";
 import AlertsDashboard from "./alerts-dashboard";
+// import Test from "./test-dashboard";
 
 // https://docs.newrelic.com/docs/new-relic-programmable-platform-introduction
 

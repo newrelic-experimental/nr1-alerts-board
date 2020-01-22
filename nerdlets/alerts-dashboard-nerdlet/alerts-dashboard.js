@@ -1,10 +1,19 @@
 import React from "react";
 import { Stack, StackItem, Grid, GridItem } from "nr1";
-import { Card, Image, Statistic, Tab, Label, Menu } from "semantic-ui-react";
+import {
+  Card,
+  Image,
+  Statistic,
+  Tab,
+  Label,
+  Menu,
+  Icon
+} from "semantic-ui-react";
 import AccountPicker from "./account-picker.js";
 import SplashPage from "./splashpage.js";
 import { EntitySearchByAccount } from "./utils.js";
 import { SemipolarLoading } from "react-loadingg";
+import Fullscreen from "react-full-screen";
 
 import Critical from "./assets/CRITICAL.png";
 import Warning from "./assets/WARNING.png";
@@ -25,15 +34,20 @@ export default class AlertsDashboard extends React.Component {
         BROWSER: 0,
         MOBILE: 0
       },
-      showTabs: false
+      showTabs: false,
+      isFull: false
     };
     this.onAccountSelected = this.onAccountSelected.bind(this);
   }
 
+  goFull = () => {
+    this.setState({ isFull: true });
+  };
+
   componentDidMount() {
     this.interval = setInterval(
       () => this._fetchData(this.state.selectedAccountId),
-      1500000
+      30000
     );
   }
 
@@ -256,7 +270,7 @@ export default class AlertsDashboard extends React.Component {
           </Tab.Pane>
         );
       } else {
-        return <SplashPage></SplashPage>;
+        return <SplashPage {...this.state}></SplashPage>;
       }
     }
   }
@@ -265,7 +279,7 @@ export default class AlertsDashboard extends React.Component {
     if (!this.state.showTabs) {
       return this.rendercards();
     } else {
-      return <Tab panes={this.renderTabs()} />;
+      return <Tab panes={this.renderTabs()} style={{ background: "#fff" }} />;
     }
   }
 
@@ -352,19 +366,29 @@ export default class AlertsDashboard extends React.Component {
               horizontalType={Stack.HORIZONTAL_TYPE.RIGHT}
             >
               <StackItem>{this.renderCounts()}</StackItem>
+              <StackItem>
+                <button onClick={this.goFull}>
+                  <Icon title="TV Mode" name="tv" size="big"></Icon>
+                </button>
+              </StackItem>
             </Stack>
           </StackItem>
         </Stack>
-        <Grid
-          className="primary-grid"
-          spacingType={[Grid.SPACING_TYPE.NONE, Grid.SPACING_TYPE.NONE]}
+        <Fullscreen
+          enabled={this.state.isFull}
+          onChange={isFull => this.setState({ isFull })}
         >
-          <GridItem className="primary-content-container" columnSpan={12}>
-            <main className="primary-content full-height">
-              {this.renderContainer()}
-            </main>
-          </GridItem>
-        </Grid>
+          <Grid
+            className="primary-grid"
+            spacingType={[Grid.SPACING_TYPE.NONE, Grid.SPACING_TYPE.NONE]}
+          >
+            <GridItem className="primary-content-container" columnSpan={12}>
+              <main className="primary-content full-height">
+                {this.renderContainer()}
+              </main>
+            </GridItem>
+          </Grid>
+        </Fullscreen>
       </>
     );
   }

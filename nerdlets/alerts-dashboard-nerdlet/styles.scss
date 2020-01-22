@@ -13,6 +13,11 @@
   min-height: 100%;
 }
 
+.fullscreen-enabled {
+  background-color: #fff !important;
+  height: 100% !important;
+}
+
 .toolbar-container {
   height: 74px;
   box-sizing: border-box;
@@ -53,7 +58,7 @@
 }
 
 .primary-content-container {
-  overflow: scroll;
+  overflow: hidden;
   padding: 16px;
 }
 

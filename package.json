@@ -9,7 +9,7 @@
     "eslint-fix": "eslint nerdlets/ --fix"
   },
   "nr1": {
-    "uuid": "dc235508-b24f-4845-957e-a62e544a9512"
+    "uuid": "49537c50-fee2-4d3c-9f44-abcb962d1f4f"
   },
   "dependencies": {
     "prop-types": "^15.6.2",
