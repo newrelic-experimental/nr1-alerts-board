@@ -20,6 +20,22 @@ import Warning from "./assets/WARNING.png";
 import NotAlerting from "./assets/NOT_ALERTING.png";
 import NotConfigured from "./assets/NOT_CONFIGURED.png";
 
+const notificationCount = {
+  APM: 0,
+  HOST: 0,
+  BROWSER: 0,
+  MOBILE: 0
+};
+
+const notificationColor = {
+  APM: "green",
+  HOST: "green",
+  BROWSER: "green",
+  MOBILE: "green"
+};
+
+const loop = 30000;
+
 export default class AlertsDashboard extends React.Component {
   constructor(props) {
     super(props);
@@ -28,16 +44,14 @@ export default class AlertsDashboard extends React.Component {
       account: "",
       selectedAccountId: undefined,
       loading: true,
-      notificationCount: {
-        APM: 0,
-        HOST: 0,
-        BROWSER: 0,
-        MOBILE: 0
-      },
       showTabs: false,
-      isFull: false
+      isFull: false,
+      fullscreenDisabled: true,
+      notificationCount,
+      notificationColor
     };
     this.onAccountSelected = this.onAccountSelected.bind(this);
+    this.initialState = {};
   }
 
   goFull = () => {
@@ -47,7 +61,7 @@ export default class AlertsDashboard extends React.Component {
   componentDidMount() {
     this.interval = setInterval(
       () => this._fetchData(this.state.selectedAccountId),
-      30000
+      loop
     );
   }
 
@@ -72,13 +86,19 @@ export default class AlertsDashboard extends React.Component {
         this.setState({
           entities: values["0"].data.actor.entitySearch.results.entities,
           loading: false,
-          showTabs: true
+          showTabs: true,
+          fullscreenDisabled: false,
+          notificationCount,
+          notificationColor
         });
       } else {
         this.setState({
           entities: [],
           loading: false,
-          showTabs: false
+          showTabs: false,
+          fullscreenDisabled: true,
+          notificationCount,
+          notificationColor
         });
       }
       this.renderNotificationCount();
@@ -192,6 +212,10 @@ export default class AlertsDashboard extends React.Component {
               notificationCount: {
                 ...prevState.notificationCount,
                 APM: apm
+              },
+              notificationColor: {
+                ...prevState.notificationColor,
+                APM: "red"
               }
             }));
           } else if (entity.entityType === "BROWSER_APPLICATION_ENTITY") {
@@ -200,6 +224,10 @@ export default class AlertsDashboard extends React.Component {
               notificationCount: {
                 ...prevState.notificationCount,
                 BROWSER: browser
+              },
+              notificationColor: {
+                ...prevState.notificationColor,
+                BROWSER: "red"
               }
             }));
           } else if (entity.entityType === "MOBILE_APPLICATION_ENTITY") {
@@ -208,6 +236,10 @@ export default class AlertsDashboard extends React.Component {
               notificationCount: {
                 ...prevState.notificationCount,
                 MOBILE: mobile
+              },
+              notificationColor: {
+                ...prevState.notificationColor,
+                MOBILE: "red"
               }
             }));
           } else if (entity.entityType === "INFRASTRUCTURE_HOST_ENTITY") {
@@ -216,6 +248,10 @@ export default class AlertsDashboard extends React.Component {
               notificationCount: {
                 ...prevState.notificationCount,
                 HOST: host
+              },
+              notificationColor: {
+                ...prevState.notificationColor,
+                HOST: "red"
               }
             }));
           }
@@ -289,7 +325,7 @@ export default class AlertsDashboard extends React.Component {
         menuItem: (
           <Menu.Item key="apm">
             APM
-            <Label circular color="red" floating>
+            <Label circular color={this.state.notificationColor.APM} floating>
               {this.state.notificationCount.APM}
             </Label>
           </Menu.Item>
@@ -300,7 +336,7 @@ export default class AlertsDashboard extends React.Component {
         menuItem: (
           <Menu.Item key="host">
             HOST
-            <Label circular color="red" floating>
+            <Label circular color={this.state.notificationColor.HOST} floating>
               {this.state.notificationCount.HOST}
             </Label>
           </Menu.Item>
@@ -311,7 +347,11 @@ export default class AlertsDashboard extends React.Component {
         menuItem: (
           <Menu.Item key="browser">
             BROWSER
-            <Label circular color="red" floating>
+            <Label
+              circular
+              color={this.state.notificationColor.BROWSER}
+              floating
+            >
               {this.state.notificationCount.BROWSER}
             </Label>
           </Menu.Item>
@@ -323,7 +363,11 @@ export default class AlertsDashboard extends React.Component {
         menuItem: (
           <Menu.Item key="mobile">
             MOBILE
-            <Label circular color="red" floating>
+            <Label
+              circular
+              color={this.state.notificationColor.MOBILE}
+              floating
+            >
               {this.state.notificationCount.MOBILE}
             </Label>
           </Menu.Item>
@@ -336,6 +380,7 @@ export default class AlertsDashboard extends React.Component {
   }
 
   render() {
+    console.log("RENDER");
     return (
       <>
         <Stack
@@ -367,7 +412,10 @@ export default class AlertsDashboard extends React.Component {
             >
               <StackItem>{this.renderCounts()}</StackItem>
               <StackItem>
-                <button onClick={this.goFull}>
+                <button
+                  onClick={this.goFull}
+                  disabled={this.state.fullscreenDisabled}
+                >
                   <Icon title="TV Mode" name="tv" size="big"></Icon>
                 </button>
               </StackItem>

@@ -18,7 +18,7 @@ export default class SplashPage extends React.Component {
         <div>
           <div className="ui message">
             <div className="header">
-              What you can't measure is what you can't see!
+              What you can't see is what you can't measure!
             </div>
             <p>
               Currently there are no application instrumented or reporting on
