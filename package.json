@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "alerts-dashboard",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "scripts": {
     "start": "nr1 nerdpack:serve",
     "test": "exit 0",
@@ -9,7 +9,7 @@
     "eslint-fix": "eslint nerdlets/ --fix"
   },
   "nr1": {
-    "uuid": "49537c50-fee2-4d3c-9f44-abcb962d1f4f"
+    "uuid": "20ba1d7b-05fa-4b9e-aeb1-1c24ffdf243d"
   },
   "dependencies": {
     "prop-types": "^15.6.2",
@@ -19,7 +19,9 @@
     "react-ui-cards": "^1.5.0",
     "semantic-ui-react": "^0.87.1",
     "react-loadingg": "^1.7.1",
-    "react-full-screen": "^0.2.4"
+    "react-full-screen": "^0.2.4",
+    "graphql-tag": "^2.10.1",
+    "graphql": "14.6.0"
   },
   "browserslist": [
     "last 2 versions",

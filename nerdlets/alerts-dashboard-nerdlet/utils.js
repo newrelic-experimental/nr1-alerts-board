@@ -1,14 +1,22 @@
 import { NerdGraphQuery } from "nr1";
+import gql from "graphql-tag";
+
+export const nerdGraphQuery = async query => {
+  const nerdGraphData = await NerdGraphQuery.query({
+    query: gql`
+      ${query}
+    `
+  });
+  return nerdGraphData.data;
+};
 
 // search for entities by domain & account
-export const EntitySearchByAccount = async (domain, accountId, cursor) => {
-  const gql = `
-    {
+export const EntitySearchByAccount = (accountId, cursor) => gql`{
 		  actor {
-		    entitySearch(query: "type IN ('APPLICATION', 'HOST') AND (accountId='${accountId}')") {
+		    entitySearch(query: "type IN ('APPLICATION', 'HOST', 'MONITOR') AND (accountId='${accountId}')") {
 		      count
 		      query
-		      results {
+		      results${cursor ? `(cursor: "${cursor}")` : ""} {
 		        entities {
 					... on AlertableEntityOutline {
 					  alertSeverity
@@ -18,19 +26,8 @@ export const EntitySearchByAccount = async (domain, accountId, cursor) => {
 					permalink
 					type
 					entityType
-				}
+				}nextCursor
 		      }
 		    }
 		  }
 		}`;
-  let result = await NerdGraphQuery.query({ query: gql });
-  if (result.errors) {
-    console.log(
-      "Can't get reporting event types because NRDB is grumpy at NerdGraph.",
-      result.errors
-    );
-    console.log(JSON.stringify(result.errors.slice(0, 5), 0, 2));
-    return [];
-  }
-  return result;
-};

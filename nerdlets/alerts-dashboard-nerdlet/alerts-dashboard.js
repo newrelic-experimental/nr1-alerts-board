@@ -9,9 +9,9 @@ import {
   Menu,
   Icon
 } from "semantic-ui-react";
-import AccountPicker from "./account-picker.js";
-import SplashPage from "./splashpage.js";
-import { EntitySearchByAccount } from "./utils.js";
+import AccountPicker from "./account-picker";
+import SplashPage from "./splashpage";
+import { nerdGraphQuery, EntitySearchByAccount } from "./utils";
 import { SemipolarLoading } from "react-loadingg";
 import Fullscreen from "react-full-screen";
 
@@ -24,17 +24,23 @@ const notificationCount = {
   APM: 0,
   HOST: 0,
   BROWSER: 0,
-  MOBILE: 0
+  MOBILE: 0,
+  SYNTHETICS: 0,
+  DATABASE: 0,
+  EXTERNAL: 0
 };
 
 const notificationColor = {
   APM: "green",
   HOST: "green",
   BROWSER: "green",
-  MOBILE: "green"
+  MOBILE: "green",
+  SYNTHETICS: "green",
+  DATABASE: "green",
+  EXTERNAL: "green"
 };
 
-const loop = 30000;
+const refresh = 30000;
 
 export default class AlertsDashboard extends React.Component {
   constructor(props) {
@@ -51,6 +57,7 @@ export default class AlertsDashboard extends React.Component {
       notificationColor
     };
     this.onAccountSelected = this.onAccountSelected.bind(this);
+    this.fetchEntities = this.fetchEntities.bind(this);
     this.initialState = {};
   }
 
@@ -61,7 +68,7 @@ export default class AlertsDashboard extends React.Component {
   componentDidMount() {
     this.interval = setInterval(
       () => this._fetchData(this.state.selectedAccountId),
-      loop
+      refresh
     );
   }
 
@@ -73,18 +80,27 @@ export default class AlertsDashboard extends React.Component {
     this.setState({
       selectedAccountId: accountId
     });
-    this._fetchData(accountId);
+    this.fetchEntities(accountId);
   }
 
-  async _fetchData(accountId) {
-    let apm = EntitySearchByAccount("APM", accountId);
-    Promise.all([apm]).then(values => {
-      if (values["0"].data.actor.entitySearch.count != 0) {
-        this.sortbySeverity(
-          values["0"].data.actor.entitySearch.results.entities
-        );
+  fetchEntities = async (accountId, cursor) => {
+    let { entities } = this.state;
+    if (!cursor) {
+      entities = [];
+    }
+    let nerdGraphResult = await nerdGraphQuery(
+      EntitySearchByAccount(accountId, cursor)
+    );
+    let entitySearchResults =
+      (((nerdGraphResult || {}).actor || {}).entitySearch || {}).results || {};
+    entities = [...entities, ...entitySearchResults.entities];
+    await this.setState({ entities });
+    if (entitySearchResults.nextCursor) {
+      this.fetchEntities(accountId, entitySearchResults.nextCursor);
+    } else {
+      if (this.state.entities.length != 0) {
+        this.sortbySeverity(this.state.entities);
         this.setState({
-          entities: values["0"].data.actor.entitySearch.results.entities,
           loading: false,
           showTabs: true,
           fullscreenDisabled: false,
@@ -93,7 +109,6 @@ export default class AlertsDashboard extends React.Component {
         });
       } else {
         this.setState({
-          entities: [],
           loading: false,
           showTabs: false,
           fullscreenDisabled: true,
@@ -102,8 +117,8 @@ export default class AlertsDashboard extends React.Component {
         });
       }
       this.renderNotificationCount();
-    });
-  }
+    }
+  };
 
   sortbySeverity(data) {
     var severtityOrder = [
@@ -203,6 +218,7 @@ export default class AlertsDashboard extends React.Component {
     let host = 0;
     let browser = 0;
     let mobile = 0;
+    let synthetics = 0;
     {
       this.state.entities.map(entity => {
         if (entity.alertSeverity == "CRITICAL") {
@@ -248,6 +264,18 @@ export default class AlertsDashboard extends React.Component {
               notificationCount: {
                 ...prevState.notificationCount,
                 HOST: host
+              },
+              notificationColor: {
+                ...prevState.notificationColor,
+                HOST: "red"
+              }
+            }));
+          } else if (entity.entityType === "SYNTHETIC_MONITOR_ENTITY") {
+            host = host + 1;
+            this.setState(prevState => ({
+              notificationCount: {
+                ...prevState.notificationCount,
+                SYNTHETICS: synthetics
               },
               notificationColor: {
                 ...prevState.notificationColor,
@@ -315,7 +343,11 @@ export default class AlertsDashboard extends React.Component {
     if (!this.state.showTabs) {
       return this.rendercards();
     } else {
-      return <Tab panes={this.renderTabs()} style={{ background: "#fff" }} />;
+      return (
+        <>
+          <Tab panes={this.renderTabs()} style={{ background: "#fff" }} />
+        </>
+      );
     }
   }
 
@@ -324,7 +356,7 @@ export default class AlertsDashboard extends React.Component {
       {
         menuItem: (
           <Menu.Item key="apm">
-            APM
+            APPLICATION
             <Label circular color={this.state.notificationColor.APM} floating>
               {this.state.notificationCount.APM}
             </Label>
@@ -346,7 +378,7 @@ export default class AlertsDashboard extends React.Component {
       {
         menuItem: (
           <Menu.Item key="browser">
-            BROWSER
+            FRONT END
             <Label
               circular
               color={this.state.notificationColor.BROWSER}
@@ -362,7 +394,7 @@ export default class AlertsDashboard extends React.Component {
       {
         menuItem: (
           <Menu.Item key="mobile">
-            MOBILE
+            MOBILE APP
             <Label
               circular
               color={this.state.notificationColor.MOBILE}
@@ -374,13 +406,59 @@ export default class AlertsDashboard extends React.Component {
         ),
         render: () =>
           this.rendercards("APPLICATION", "MOBILE_APPLICATION_ENTITY")
+      },
+      {
+        menuItem: (
+          <Menu.Item key="synthetics">
+            SYNTHETICS
+            <Label
+              circular
+              color={this.state.notificationColor.SYNTHETICS}
+              floating
+            >
+              {this.state.notificationCount.SYNTHETICS}
+            </Label>
+          </Menu.Item>
+        ),
+        render: () => this.rendercards("MONITOR", "SYNTHETIC_MONITOR_ENTITY")
+      },
+      {
+        menuItem: (
+          <Menu.Item key="database">
+            DATABASE
+            <Label
+              circular
+              color={this.state.notificationColor.DATABASE}
+              floating
+            >
+              {this.state.notificationCount.DATABASE}
+            </Label>
+          </Menu.Item>
+        ),
+        render: () =>
+          this.rendercards("APPLICATION", "APM_DATABASE_INSTANCE_ENTITY")
+      },
+      {
+        menuItem: (
+          <Menu.Item key="external">
+            EXTERNAL
+            <Label
+              circular
+              color={this.state.notificationColor.EXTERNAL}
+              floating
+            >
+              {this.state.notificationCount.EXTERNAL}
+            </Label>
+          </Menu.Item>
+        ),
+        render: () =>
+          this.rendercards("APPLICATION", "APM_EXTERNAL_SERVICE_ENTITY")
       }
     ];
     return panes;
   }
 
   render() {
-    console.log("RENDER");
     return (
       <>
         <Stack
