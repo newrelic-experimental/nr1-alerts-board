@@ -6,11 +6,11 @@ Create an Alerts Dashboard that goes beyond the traditional static view og healt
 
 This Dashboard also provides a unique solution for Colour Blind community by not relying on colour coding but instead uses visual cues like Wobble effects or Pictorial references. All within the New Relic platform.
 
-###Standard view
+##Standard view
 
 ![Screenshot](./screenshots/1.png)
 
-###Full Screen Mode
+##Full Screen Mode
 
 ![Screenshot](./screenshots/2.png)
 
