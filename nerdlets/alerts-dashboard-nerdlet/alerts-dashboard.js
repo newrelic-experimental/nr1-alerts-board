@@ -67,7 +67,7 @@ export default class AlertsDashboard extends React.Component {
 
   componentDidMount() {
     this.interval = setInterval(
-      () => this._fetchData(this.state.selectedAccountId),
+      () => this.fetchEntities(this.state.selectedAccountId),
       refresh
     );
   }
@@ -271,7 +271,7 @@ export default class AlertsDashboard extends React.Component {
               }
             }));
           } else if (entity.entityType === "SYNTHETIC_MONITOR_ENTITY") {
-            host = host + 1;
+            synthetics = synthetics + 1;
             this.setState(prevState => ({
               notificationCount: {
                 ...prevState.notificationCount,
@@ -279,7 +279,7 @@ export default class AlertsDashboard extends React.Component {
               },
               notificationColor: {
                 ...prevState.notificationColor,
-                HOST: "red"
+                SYNTHETICS: "red"
               }
             }));
           }
