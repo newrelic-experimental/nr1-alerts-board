@@ -1,8 +1,10 @@
 # nr1-alerts-dashboard
 
+[![New Relic Experimental header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/Experimental.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#new-relic-experimental)
+
 ## Usage
 
-Create an Alerts Dashboard that goes beyond the traditional static view og health pf your sevices. Not only you can use this dashboard for simplified clean UI but also for cross account entities in complex setups.
+Create an Alerts Dashboard that goes beyond the traditional static view with health of your sevices. Not only you can use this dashboard for simplified clean UI but also for cross account entities in complex setups.
 
 This Dashboard also provides a unique solution for Colour Blind community by not relying on colour coding but instead uses visual cues like Wobble effects or Pictorial references. All within the New Relic platform.
 
