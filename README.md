@@ -1,6 +1,9 @@
-# nr1-alerts-dashboard
 
 [![New Relic Experimental header](https://github.com/newrelic/open-source-office/raw/master/examples/categories/images/Experimental.png)](https://github.com/newrelic/open-source-office/blob/master/examples/categories/index.md#new-relic-experimental)
+
+# New Relic One Alerts Dashboard (nr1-alerts-dashboard)
+
+![CI](https://github.com/newrelic-experimental/nr1-alerts-board/workflows/CI/badge.svg) ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/newrelic-experimental/nr1-alerts-board?include_prereleases&sort=semver) [![Snyk](https://snyk.io/test/github/newrelic-experimental/nr1-alerts-board/badge.svg)](https://snyk.io/test/github/newrelic-experimental/nr1-alerts-board)
 
 ## Usage
 
@@ -8,11 +11,11 @@ Create an Alerts Dashboard that goes beyond the traditional static view with hea
 
 This Dashboard also provides a unique solution for Colour Blind community by not relying on colour coding but instead uses visual cues like Wobble effects or Pictorial references. All within the New Relic platform.
 
-##Standard view
+## Standard view
 
 ![Screenshot](./screenshots/1.png)
 
-##Full Screen Mode
+## Full Screen Mode
 
 ![Screenshot](./screenshots/2.png)
 

@@ -8,9 +8,6 @@
     "eslint-check": "eslint nerdlets/",
     "eslint-fix": "eslint nerdlets/ --fix"
   },
-  "nr1": {
-    "uuid": "e6f9b65f-9fab-42c6-9bb8-860720121039"
-  },
   "dependencies": {
     "prop-types": "^15.6.2",
     "react": "^16.6.3",
